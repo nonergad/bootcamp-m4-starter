@@ -1,22 +1,31 @@
 import React, { Component } from 'react';
 import './SearchBox.css';
+import {useState} from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 
-class SearchBox extends Component {
-    state = {
-        searchLine: ''
+function SearchBox () {
+    const [searchLine, setSearchLine] = useState('');
+    const dispatch = useDispatch();
+    let test = useSelector(state => state.movies);
+
+    
+    const searchLineChangeHandler = (e) => {
+        setSearchLine(e.target.value);
     }
-    searchLineChangeHandler = (e) => {
-        this.setState({ searchLine: e.target.value });
-    }
-    searchBoxSubmitHandler = (e) => {
+
+    const searchBoxSubmitHandler = (e) => {
         e.preventDefault();
+        fetch (`http://www.omdbapi.com/?s=${searchLine}&apikey=8ddfbbdf`)
+            .then (res => res.json())
+            .then (data => dispatch({type:"FETCH_MOVIES", payload: data.Search}))
+            .catch (error => {
+                throw(error);
+            })
     }
-    render() {
-        const { searchLine } = this.state;
 
         return (
             <div className="search-box">
-                <form className="search-box__form" onSubmit={this.searchBoxSubmitHandler}>
+                <form className="search-box__form" onSubmit={searchBoxSubmitHandler}>
                     <label className="search-box__form-label">
                         Искать фильм по названию:
                         <input
@@ -24,7 +33,7 @@ class SearchBox extends Component {
                             type="text"
                             className="search-box__form-input"
                             placeholder="Например, Shawshank Redemption"
-                            onChange={this.searchLineChangeHandler}
+                            onChange={searchLineChangeHandler}
                         />
                     </label>
                     <button
@@ -38,6 +47,5 @@ class SearchBox extends Component {
             </div>
         );
     }
-}
  
 export default SearchBox;
